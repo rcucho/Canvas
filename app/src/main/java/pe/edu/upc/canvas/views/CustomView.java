@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
@@ -21,6 +23,9 @@ public class CustomView extends View {
     private int backgroundFill;
     private List<Circle> circleList = Collections.emptyList();
 
+    ///para el evento ontouch
+    private Path mPath = new Path();
+
     public CustomView(Context context, @Nullable AttributeSet attributeSet) {
 
         super(context, attributeSet);
@@ -35,18 +40,57 @@ public class CustomView extends View {
         canvas.drawPaint(mPaint);
 
         mPaint.setColor(Color.BLUE);
-        for(Circle model : circleList)
+        /*for(Circle model : getCircleList()) {
             canvas.drawCircle(model.getX(), model.getY(), 100, mPaint);
+        }*/
+        /// para el evento ontouch
+        if (accion =="down"){
+            mPath.moveTo(iniTouchX,iniTouchY);
+            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);
+        }
+        if (accion == "move") {
+            mPath.moveTo(iniTouchX, iniTouchY);
+            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);
+        }
+        if (accion == "up")
+            mPath.moveTo(iniTouchX, iniTouchY);
+            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);
+
+        canvas.drawPath(mPath,mPaint);
     }
 
     public void setBackgroundFill(@ColorInt int backgroundFill){
         this.backgroundFill = backgroundFill;
     }
-
+    public List<Circle> getCircleList(){
+        return circleList;
+    }
     public void setCircleList(List<Circle> circles){
         this.circleList = circles;
     }
 
+    ///para el evento ontouch
+    float iniTouchX = 50;
+    float iniTouchY = 50;
+    String accion = "accion";
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        iniTouchX = event.getX();
+        iniTouchY = event.getY();
+        if (event.getAction() == MotionEvent.ACTION_DOWN){
+            accion = "down";
+        }
+        if (event.getAction() == MotionEvent.ACTION_MOVE){
+            accion = "move";
+        }
+        if(event.getAction() == MotionEvent.ACTION_UP){
+            accion = "up";
+        }
+
+        invalidate();
+        return true;
+    }
 }
 
 
