@@ -25,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
         activityMainBinding.setVariable(BR.customViewModel, viewModel);
         activityMainBinding.executePendingBindings();
 
-        viewModel.backgroundFill.set(Color.WHITE);
-        viewModel.setCircleList(Arrays.asList(new Circle(200,400), new Circle(400,400)));
+        //viewModel.backgroundFill.set(Color.YELLOW);
+        //viewModel.setCircleList(Arrays.asList(new Circle(200,400), new Circle(400,400)));
 
     }
 }

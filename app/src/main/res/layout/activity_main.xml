@@ -16,10 +16,9 @@
         <pe.edu.upc.canvas.views.CustomView
             android:id="@+id/canvas"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:backgroundFill="@{customViewModel.backgroundFill}"
-            app:circleList="@{customViewModel.circleList}" />
-
+            android:layout_height="match_parent" />
+            <!--app:backgroundFill="@{customViewModel.backgroundFill}"
+            app:circleList="@{customViewModel.circleList}"   -->
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

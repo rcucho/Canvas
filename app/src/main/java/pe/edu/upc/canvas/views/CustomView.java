@@ -12,6 +12,8 @@ import android.view.View;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,32 +21,49 @@ import pe.edu.upc.canvas.models.Circle;
 
 public class CustomView extends View {
 
-    private Paint mPaint = new Paint();
+    private Paint mPaint;
     private int backgroundFill;
-    private List<Circle> circleList = Collections.emptyList();
+    private List<Circle> circleList; // = Collections.emptyList();
+    float posX = 50;
+    float posY = 50;
+    private List<Paint> paintList;
+    private Circle mCircle;
 
     ///para el evento ontouch
-    private Path mPath = new Path();
+    private Path mPath;
 
     public CustomView(Context context, @Nullable AttributeSet attributeSet) {
-
         super(context, attributeSet);
-        mPaint.setStyle(Paint.Style.FILL);
+        paintList = new ArrayList<>();
+        circleList = new ArrayList<>();
+        //mPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
     protected void onDraw(Canvas canvas){
         super.onDraw(canvas);
 
-        mPaint.setColor(backgroundFill);
-        canvas.drawPaint(mPaint);
+        //mPaint.setColor(backgroundFill);
+        //canvas.drawPaint(mPaint);
 
-        mPaint.setColor(Color.BLUE);
-        /*for(Circle model : getCircleList()) {
+        int i = 0;
+        for(Circle circle : getCircleList()){
+            canvas.drawCircle(circle.getX(),circle.getY(),100, paintList.get(i));
+        }
+        //mPaint.setColor(Color.BLUE);
+        /*for(Circle model : circleList) {
             canvas.drawCircle(model.getX(), model.getY(), 100, mPaint);
+            if (accion =="down"){
+                mPath.moveTo(iniTouchX,iniTouchY);
+                model.setX(iniTouchX);
+                model.setY(iniTouchY);
+                //setCircleList(Arrays.asList(model));
+                canvas.drawCircle(model.getX(), model.getY(), 100, mPaint);
+                canvas.drawPath(mPath,mPaint);
+            }
         }*/
         /// para el evento ontouch
-        if (accion =="down"){
+        /*if (accion =="down"){
             mPath.moveTo(iniTouchX,iniTouchY);
             canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);
         }
@@ -54,9 +73,10 @@ public class CustomView extends View {
         }
         if (accion == "up")
             mPath.moveTo(iniTouchX, iniTouchY);
-            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);
+            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);*/
 
-        canvas.drawPath(mPath,mPaint);
+        //canvas.drawPath(mPath,mPaint);
+        //canvas.restore();
     }
 
     public void setBackgroundFill(@ColorInt int backgroundFill){
@@ -70,24 +90,37 @@ public class CustomView extends View {
     }
 
     ///para el evento ontouch
-    float iniTouchX = 50;
-    float iniTouchY = 50;
-    String accion = "accion";
+
+    //String accion = "accion";
 
     @Override
     public boolean onTouchEvent(MotionEvent event){
-        iniTouchX = event.getX();
-        iniTouchY = event.getY();
-        if (event.getAction() == MotionEvent.ACTION_DOWN){
-            accion = "down";
+        posX = event.getX();
+        posY = event.getY();
+        /*if (event.getAction() == MotionEvent.ACTION_DOWN){accion = "down"; }
+        if (event.getAction() == MotionEvent.ACTION_MOVE){accion = "move"; }
+        if(event.getAction() == MotionEvent.ACTION_UP){accion = "up"; }*/
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                mPaint = new Paint();
+                mPaint.setStyle(Paint.Style.FILL);
+                mPaint.setColor(Color.BLUE);
+                paintList.add(mPaint);
+                mCircle = new Circle(posX,posY);
+                mPath = new Path();
+                mPath.moveTo(posX,posY);
+                circleList.add(mCircle);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                /*respecto a un area*/
+            case MotionEvent.ACTION_UP:
+                /*int pHistorical = event.getHistorySize();
+                for (int i=0; i < pHistorical; i++) {
+                    mPath.moveTo(event.getHistoricalX(i),event.getHistoricalY(i));
+                    circleList.add(mCircle);
+                }
+                break;*/
         }
-        if (event.getAction() == MotionEvent.ACTION_MOVE){
-            accion = "move";
-        }
-        if(event.getAction() == MotionEvent.ACTION_UP){
-            accion = "up";
-        }
-
         invalidate();
         return true;
     }
