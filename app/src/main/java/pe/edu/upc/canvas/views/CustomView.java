@@ -5,17 +5,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pe.edu.upc.canvas.models.Circle;
 
@@ -23,11 +26,10 @@ public class CustomView extends View {
 
     private Paint mPaint;
     private int backgroundFill;
-    private List<Circle> circleList; // = Collections.emptyList();
-    float posX = 50;
-    float posY = 50;
+    private List<Circle> circleList;
     private List<Paint> paintList;
     private Circle mCircle;
+    private float mCircleRadio = 100;
 
     ///para el evento ontouch
     private Path mPath;
@@ -36,47 +38,18 @@ public class CustomView extends View {
         super(context, attributeSet);
         paintList = new ArrayList<>();
         circleList = new ArrayList<>();
-        //mPaint.setStyle(Paint.Style.FILL);
+
     }
 
     @Override
     protected void onDraw(Canvas canvas){
         super.onDraw(canvas);
 
-        //mPaint.setColor(backgroundFill);
-        //canvas.drawPaint(mPaint);
-
         int i = 0;
         for(Circle circle : getCircleList()){
-            canvas.drawCircle(circle.getX(),circle.getY(),100, paintList.get(i));
+            canvas.drawCircle(circle.getX(),circle.getY(),mCircleRadio, paintList.get(i));
         }
-        //mPaint.setColor(Color.BLUE);
-        /*for(Circle model : circleList) {
-            canvas.drawCircle(model.getX(), model.getY(), 100, mPaint);
-            if (accion =="down"){
-                mPath.moveTo(iniTouchX,iniTouchY);
-                model.setX(iniTouchX);
-                model.setY(iniTouchY);
-                //setCircleList(Arrays.asList(model));
-                canvas.drawCircle(model.getX(), model.getY(), 100, mPaint);
-                canvas.drawPath(mPath,mPaint);
-            }
-        }*/
-        /// para el evento ontouch
-        /*if (accion =="down"){
-            mPath.moveTo(iniTouchX,iniTouchY);
-            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);
-        }
-        if (accion == "move") {
-            mPath.moveTo(iniTouchX, iniTouchY);
-            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);
-        }
-        if (accion == "up")
-            mPath.moveTo(iniTouchX, iniTouchY);
-            canvas.drawCircle(iniTouchX, iniTouchY, 100, mPaint);*/
 
-        //canvas.drawPath(mPath,mPaint);
-        //canvas.restore();
     }
 
     public void setBackgroundFill(@ColorInt int backgroundFill){
@@ -89,40 +62,63 @@ public class CustomView extends View {
         this.circleList = circles;
     }
 
-    ///para el evento ontouch
 
-    //String accion = "accion";
-
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onTouchEvent(MotionEvent event){
-        posX = event.getX();
-        posY = event.getY();
-        /*if (event.getAction() == MotionEvent.ACTION_DOWN){accion = "down"; }
-        if (event.getAction() == MotionEvent.ACTION_MOVE){accion = "move"; }
-        if(event.getAction() == MotionEvent.ACTION_UP){accion = "up"; }*/
+        float xDown = event.getX(),yDown = event.getY();
+        final float xp = xDown, yp = yDown;
+
+        List<Circle> list = circleList.stream().filter(x-> isInside(x.getX(),x.getY(),mCircleRadio,xp,yp)).collect(Collectors.toList());
+
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                mPaint = new Paint();
+                xDown = event.getX();
+                yDown = event.getY();
+
+
+                mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 mPaint.setStyle(Paint.Style.FILL);
                 mPaint.setColor(Color.BLUE);
                 paintList.add(mPaint);
-                mCircle = new Circle(posX,posY);
+                mCircle = new Circle(xDown, yDown);
                 mPath = new Path();
-                mPath.moveTo(posX,posY);
-                circleList.add(mCircle);
+                mPath.moveTo(xDown, yDown);
+
+                if(list.size() == 0)
+                    circleList.add(mCircle);
                 break;
             case MotionEvent.ACTION_MOVE:
-                /*respecto a un area*/
-            case MotionEvent.ACTION_UP:
-                /*int pHistorical = event.getHistorySize();
-                for (int i=0; i < pHistorical; i++) {
-                    mPath.moveTo(event.getHistoricalX(i),event.getHistoricalY(i));
-                    circleList.add(mCircle);
+
+                float xMoved = 0, yMoved = 0;
+                xMoved = event.getX();
+                yMoved = event.getY();
+
+                if (list.size() > 0){
+                    mCircle = list.get(list.size()-1);
+                    mCircle.setX(xMoved);
+                    mCircle.setY(yMoved);
                 }
-                break;*/
+                else {
+                    mCircle.setX(xMoved);
+                    mCircle.setY(yMoved);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+
+                break;
         }
         invalidate();
         return true;
+    }
+
+    private boolean isInside(float xCircle, float yCircle, float radio, float x, float y){
+        double x2 = Math.pow(x-xCircle, 2);
+        double y2 = Math.pow(y-yCircle, 2);
+        if (x2 + y2 <= radio*radio)
+            return true;
+        else
+            return false;
     }
 }
 
